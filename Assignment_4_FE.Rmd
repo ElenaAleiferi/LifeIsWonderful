@@ -1,0 +1,463 @@
+---
+title: "Assignment_4_FE"
+author: "Eleni Aleiferi, Fernanda Montero"
+date: "16 November 2018"
+output:
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+INTRODUCTION
+
+The California spiny lobster (Panulirus interruptus) supports a commercially and recreationally important fishery, primarily within the South Coast which encompasses California’s jurisdictional waters (0-3 nautical miles from shore) from Point Conception in Santa Barbara County to the US-MEX border, including state waters around offshore islands.
+
+Spiny lobsters are predators that play a central role in maintaining the diversity of intertidal and subtidal communities. Predation on kelp-eating species such as sea urchins helps to maintain a balance in the kelp forest ecosystem, providing a more stable habitat for other species that rely on the kelp for food and shelter. The kelp forests of the Channel Islands offer an excellent rocky habitat for their pelagic larvae arriving with the converging currents from the south.
+
+The California spiny lobster plays a significant role in structuring benthic communities in southern California, where it indirectly facilitates kelp growth via consumption of herbivorous sea urchins,
+and promotes benthic diversity by consuming competitively dominant California mussels (Mytilus californianus) on rocky shorelines and invasive Asian mussels (Musculista senhousia) in seagrass habitat. The California Department of Fish and Wildlife (CDFW) regulates both the commercial and recreational fishing of the California spiny lobster with seasonal closures, size limits, gear restrictions and licensing. Because of the economic and ecological importance of this species, it also has been targeted for protection within an emerging network of MPAs that are being established in compliance with the California Marine Life Protection Act (MLPA).
+
+In 2000, 4.5% of the spiny lobster habitat was closed to both commercial and recreational fishing when fewer Marine Protected Areas (MPAs) were present in the Southern Coast of California. MPAs conserve and restore ocean wildlife and habitats. Under the California Marine Life Protection Act passed in 1999, California began to establish a science-based, statewide network of MPAs through a collaborative effort that includes the California Department of Fish and Wildlife and California State Parks. 
+
+Additionally in 2016,the California Department of Fish and Wildlife (CDFW) has managed the spiny lobster fishery for over a century, implementing and enforcing regulations set by the California Fish and Game Commission. Current management measures include commercial fishing permits, recreational harvest report cards, gear restrictions, size limits, time and area closures, and a recreational possession limit.
+
+
+
+
+
+- Importance of the spiny lobster for the Kelp Forests in California 
+- MPA were declared in 2012
+- Lobster Fisheries Management Plan was implemented in 2016 
+- The following report is to analyzes the effects of the California Spiny Lobster Fishery Management Plan comparting the in changes (Panalirus interruptus) spiny lobster sizes along the Santa Barbara Channel for the period 2012-2017. Specifically, in five locations close to the mainland: Arroyo Quemado, Naples Reef, Mohawk Reef, Isla Vista, and Carpinteria. 
+
+DATA ANALYSIS 
+
+- Data 
+
+Data on abundance, size and fishing pressure of California spiny lobster (Panulirus interruptus) are collected along the mainland coast of the Santa Barbara Channel. Spiny lobsters are an important predator in giant kelp forests off southern California. Two SBC LTER study reefs are located in or near the California Fish and Game Network of Marine Protected Areas (MPA), Naples and Isla Vista, both established as MPAs on 2012. MPAs provide a unique opportunity to investigate the effects of fishing on kelp forest community dynamics. Sampling began in 2012 and is ongoing.
+The  dataset contains two tables: 1) Abundance and size data collected annually by divers in late summer before the start of the fishing season at five SBC LTER long term kelp forest study sites: two within MPAs (Naples and Isla Vista) and three outside (Arroyo Quemado, Mohawk and Carpinteria) and 2) Fishing pressure, as determined by counting the number of commercial trap floats. Data are collected every two to four weeks during the lobster fishing season (October to March) at nine sites along the mainland, eight of which are also SBC LTER long-term kelp forest study reefs.
+
+- Data  Analysis and Statistic Methods 
+
+- Compare mean lobster sizes (carapace length (mm)) across the five sites for lobster observations collected in 2017: (observations are normal for each site and then with the test for equal variances, is not more than 4th time the smallest) ANOVA test:
+ -null: the means are equal
+ -alternative: the means between at least two sites are different (you cannot specify which ones, with ANOVA only two or more) 
+ 
+ RESULTS: 
+ 
+ ). - 2017 
+ 
+ Me
+ 
+ 
+ In 2012, we dont have enough observations from Naple and we found that there is. 
+ 
+ Question 3: Compartion 2012 and 2017 we found that there is only a significant difference in Mohawk Reef is smaller in 2017. But in Naples and Isla vista there is no significant difference (MPA)
+ 
+ 
+ “Sediment bulk densities (g/cm3
+) differed significantly in the four river reaches studied (one-way ANOVA,
+F(3,92) = 85.0, p < 0.001, n = 24 for each; Table 1). Post-hoc analysis by Tukey’s HSD revealed that
+sediment density in Reach A differed significantly from all other reaches (pairwise p < 0.001) and had the
+lowest mean bulk density (0.38 g/cm3
+). Sediment bulk densities in the downstream reaches were more than
+double that measured in Reach A (Figure 1), indicating that Reach A may currently offer the most suitable
+spawning habitat.”
+
+
+
+
+
+
+```{r, echo=FALSE, message=FALSE}
+library(tidyverse)
+library(pwr)
+library(knitr)
+library(kableExtra)
+library(plotly)
+library(extrafont)
+library(ggrepel)
+library(tinytex)
+library(RColorBrewer)
+library(ggpubr)
+library(effsize)
+library(vcdExtra)
+library(ggsignif)
+library(extrafont)
+library(car)
+library(FSA)
+
+lobster_s<- read_csv("lobster_size_abundance.csv")
+lobster_t <- read_csv("lobster_traps.csv")
+```
+
+```{r, echo=FALSE, message=FALSE}
+
+#edit data
+
+lobster_s1 <- lobster_s %>%
+  filter(SIZE !=-99999) %>%
+  select(YEAR, SITE, SIZE, COUNT) 
+  
+lobster_t1 <- lobster_t %>%
+  filter(SITE=="AQUE" |SITE =="NAPL" |SITE=="MOHK" |SITE=="IVEE" |SITE=="CARP") %>%
+  select(YEAR, SITE, TRAPS)
+
+#sumarize data
+
+lob_sum1 <- lobster_s1 %>% 
+  group_by(SITE) %>% 
+  summarize(count=n(),
+            mean=round(mean(SIZE),2))
+
+traps_sum <- lobster_t1 %>% 
+  group_by(SITE) %>%
+  summarize(total= sum(TRAPS))
+
+#corelate the two tables
+
+lobster_join <- full_join(lob_sum1, traps_sum, by= "SITE") 
+
+#make a table
+
+
+
+lobster_size <- lobster_s %>% 
+  select(YEAR, SITE, COUNT) %>% 
+  group_by(SITE, YEAR)
+
+
+#graph for trends
+
+traps_sum2 <- lobster_t1 %>% 
+  filter(SITE != "IVEE", SITE != "NAPL") %>% 
+  group_by(YEAR, SITE) %>% 
+  summarize(total=sum(TRAPS),
+            mean=mean(TRAPS))
+
+
+
+traps_line_g <- ggplot(traps_sum2, aes(x = YEAR, y = total, 
+                                       group = SITE, color = SITE)) +
+  geom_line(size = 1, alpha = 0.8) +
+  theme_minimal() +
+  scale_y_continuous(expand = c(0,0)) +
+  scale_x_continuous(expand = c(0,0)) +
+  labs(x = "Year", y = "Observed Traps", title = "Average Annual Observed Lobster Traps") + 
+  scale_colour_brewer(palette = "Dark2")
+
+
+lob_sum2 <- lobster_s1 %>%
+  group_by(YEAR, SITE) %>% 
+  summarize(total=sum(COUNT))
+  
+lobster_line_g <- ggplot(lob_sum2, aes(x = YEAR, y = total, 
+                                       group = SITE, color = SITE)) +
+  geom_line(size = 1, alpha = 0.8) +
+  theme_minimal() +
+  scale_y_continuous(expand = c(0,0)) +
+  scale_x_continuous(expand = c(0,0)) +
+  labs(x = "Year", y = "Number of Lobster", title = "Average Annual Observed Lobster Ambundance") +
+  scale_colour_brewer(palette = "Dark2")+
+  scale_linetype_discrete(name = "Location", labels = c("Arroyo Quemado", "Carpinteria", "Isla Vista", "Mohawk Reef", "Naples Reef"))
+
+
+```
+```{r, echo=FALSE}
+
+lobster_line_g
+traps_line_g
+```
+
+
+
+```{r, echo=FALSE, message=FALSE}
+##2.Compare mean lobster sizes (carapace length (mm)) across the five sites for lobster observations collected in 2017. Warning: the size data are not in tidy format. There are rows that contain size information for multiple lobsters observed (e.g., if the researcher saw 3 lobsters all with carapace length ~ 60 mm, then they will have a single row where COUNT = 3 and SIZE = 60). You’ll want to get this into case format - where each lobster has its own row - before doing statistical analyses. There are many ways to do this. One hint: function expand.dft in the vcdExtra package (it doesn’t like tibbles, so you might need to coerce to data.frame first).
+
+#tide size data
+
+lob_2<-expand.dft(data.frame(lobster_s1), freq="COUNT")
+
+lobster_s2 <- lob_2 %>%
+  filter(YEAR ==2017) %>% 
+  select(YEAR, SITE, SIZE)
+  
+
+#Check normality
+
+size_qq <- ggplot(lobster_s2, aes(sample=SIZE))+
+  geom_qq() +
+  facet_wrap(~SITE)
+size_qq
+
+size_hist <- ggplot(lobster_s2, aes(x=SIZE)) +
+  geom_histogram() +
+  facet_wrap(~SITE)
+size_hist
+
+#Data looks normal
+
+#Check variances
+
+lob_s2_var <- lobster_s2 %>% 
+  group_by(SITE) %>% 
+  summarize(variance=var(SIZE))
+lob_s2_var
+
+#The bigest is not more than 4*the smallest 
+#So, we can do anova test
+#null: the means are equal
+#alternative: the means between at least two sites are different
+
+lob_s2_an <- aov(SIZE ~ SITE, data= lobster_s2)
+summary(lob_s2_an)
+
+#There are at least two sites with different means
+
+lob_s2_hsd <- TukeyHSD(lob_s2_an)
+lob_s2_hsd
+
+#There is a significant difference between Napl-Carp and Napl-Ivee
+#Napl-Mohk p=0,057
+
+```
+
+
+
+```{r, echo=FALSE}
+
+#anova presentation
+
+lobster_sum <- lob_2 %>%
+  group_by(SITE) %>%
+  summarize(lobster_mean = round(mean(SIZE),2),
+            lobster_sd = round(sd(SIZE),2),
+            sample_size = length(SIZE))
+
+
+#anova graph
+
+lob_s2_boxplot <- ggplot(lobster_s2, aes(x = SITE, 
+                                y = SIZE)) +
+  geom_boxplot(aes(fill = SITE)) +
+  theme_classic() +
+  labs(x = "Site Names",
+       y = "Lobster Length (mm)", 
+       title = "Mean Lobster Size by Site") +
+  theme(legend.position = "none") +
+  scale_fill_brewer()+
+  geom_signif(y_position = c(120.0, 100.0), xmin = c(2,3), xmax = c(5,5), annotation = c("p = 0.023","p = 0.004"), tip_length = 0.1, size = 0.5, textsize = 3)
+  
+lob_s2_boxplot
+
+
+```
+
+The means of spiny lobster sizes in the five different locations differ significantly F(4,1663) = 3,42 p = 0.0085, n = ??? for each. Post-hoc analysis by Tukey's SHD reveled that spiny lobster size differ significantly from Naple and Isla Vista (p = 0.004) and Naple and Carpinteria (p = 0.023)
+
+
+```{r, echo=FALSE, message=FALSE}
+# 3. Changes in lobster size at MPA and non-MPA sites (comparing only 2012 and 2017 sizes)
+
+
+
+
+# t-test for 2012 to 2017 mean size at each of the 5 sites
+# check the normality for 2012
+lobster_12 <- lob_2 %>% 
+  filter(YEAR == "2012") 
+
+lobster_12_qq <- ggplot(lobster_12,aes(sample=SIZE))+
+  geom_qq() +
+  facet_wrap(~SITE)
+
+lobster_12_qq
+
+lobster_12_hist <- ggplot(lobster_12, aes(x=SIZE)) +
+  geom_histogram() +
+  facet_wrap(~SITE)
+
+lobster_12_hist
+
+# They look normal, except NAPL(only 6 samples)
+
+# t-tests for each site
+
+#dataframes for carp
+carp_12 <- lobster_12 %>% 
+  filter (SITE =="CARP")
+carp_17 <- lobster_s2 %>% 
+  filter (SITE =="CARP")
+
+#check for equal variance
+carp_f <-var.test(carp_12$SIZE,
+                  carp_17$SIZE)
+carp_f
+
+#t.test for equal variances
+
+carp_t<-t.test(carp_12$SIZE,carp_17$SIZE,
+               var.equal=TRUE)
+carp_t
+
+carp_ef <- cohen.d(carp_12$SIZE, carp_17$SIZE)
+carp_ef
+
+#no significant difference - small effect size
+
+#dataframes for ivee (mpa)
+
+ivee_12 <- filter(lobster_12, SITE=="IVEE")
+
+ivee_17 <- filter(lobster_s2, SITE=="IVEE")
+  
+#check for equal variance
+
+ivee_f <- var.test(ivee_12$SIZE, ivee_17$SIZE)
+
+ivee_f
+
+#t.test for equal variances
+
+ivee_t <- t.test (ivee_12$SIZE, ivee_17$SIZE,
+                       var.equal=TRUE)
+ivee_t
+
+ivee_ef <- cohen.d(ivee_12$SIZE, ivee_17$SIZE)
+ivee_ef
+
+#no significant difference - small effect size
+
+#dataframes for aque
+
+aque_12 <- filter(lobster_12, SITE=="AQUE")
+
+aque_17 <- filter(lobster_s2, SITE=="AQUE")
+
+#check for equal variance
+aque_f <- var.test(aque_12$SIZE, aque_17$SIZE)
+
+aque_f
+
+#t.test for equal variances
+
+aque_t <- t.test (aque_12$SIZE, aque_17$SIZE,
+                  var.equal=TRUE)
+aque_t
+
+aque_ef <- cohen.d(aque_12$SIZE, aque_17$SIZE)
+aque_ef
+
+#no significant difference - small effect size
+
+#dataframes for mohk
+
+mohk_12 <- filter(lobster_12, SITE=="MOHK")
+ 
+mohk_17 <- filter(lobster_s2, SITE=="MOHK")
+ 
+#check for equal variance
+
+mohk_f <- var.test(mohk_12$SIZE,mohk_17$SIZE)
+
+mohk_f
+
+#t.test for equal variances
+
+mohk_t <- t.test (mohk_12$SIZE, mohk_17$SIZE,
+                  var.equal=TRUE)
+mohk_t
+
+
+mohk_ef <- cohen.d(mohk_12$SIZE, mohk_17$SIZE)
+mohk_ef
+
+#there is signifficant difference - medium effect size
+
+#dataframes for napl (mpa)
+
+napl_12 <- filter(lobster_12, SITE=="NAPL")
+#there are only 6 observations for 2012
+  
+napl_17 <- filter(lobster_s2, SITE=="NAPL")
+ 
+#check for equal variance
+napl_f <- var.test(napl_12$SIZE,napl_17$SIZE)
+
+napl_f
+
+#t.test for equal variances
+
+napl_t <- t.test (napl_12$SIZE, napl_17$SIZE,
+                  var.equal=TRUE)
+napl_t
+
+#no significant difference
+#effect size
+
+napl_ef <- cohen.d(napl_12$SIZE, napl_17$SIZE)
+napl_ef
+
+#small effect size
+
+```
+
+The results of the Student's t-test in  Arroyo Quemado show that the mean length of lobster in 2017 (73.9 mm) is not significantly different from the mean lobster length in 2012 (71 mm) (t(`r round(aque_t$parameter,2)` = `r round(aque_t$statistic,2)`, *p* = `r round(aque_t$p.value,3)`, $\alpha$ = 0.05). 
+
+The results of the Student's t-test in  Carpinteria show that the mean length of lobster in 2017 (72.2 mm) is not significantly different from the mean lobster length in 2012 (74.4 mm) (t(`r round(carp_t$parameter,2)` = `r round(carp_t$statistic,2)`, *p* = `r round(carp_t$p.value,3)`, $\alpha$ = 0.05)
+
+The results of the Student's t-test in Mohawk Reef show that the mean length of lobster in 2017 (72 mm) is significantly smaller than the mean lobster length in 2012 (77.2 mm) (t(`r round(mohk_t$parameter,2)` = `r round(mohk_t$statistic,2)`, *p* = `r round(mohk_t$p.value,3)`, $\alpha$ = 0.05). This difference has a medium effect size (d = 0.54).
+
+##### Change in lobster size between 2012 and 2017 for MPA sites
+
+The results of the Student's t-test in  Isla Vista show that the mean length of lobster in 2017 (71.4 mm) is not significantly different from the mean lobster length in 2012 (66.1 mm) (t(`r round(ivee_t$parameter,2)` = `r round(ivee_t$statistic,2)`, *p* = `r round(ivee_t$p.value,3)`, $\alpha$ = 0.05)
+
+The results of the Student's t-test in Naples Reef show that the mean length of lobster in 2017 (76.2 mm) is not significantly different from the mean lobster length in 2012 (73 mm) (t(`r round(napl_t$parameter,2)` = `r round(napl_t$statistic,2)`, *p* = `r round(napl_t$p.value,3)`, $\alpha$ = 0.05)
+However, it is important to mention that the observations of lobsters in Naples Reef during 2012 were only few (6).
+
+
+
+
+
+```{r, echo=FALSE, include=FALSE}
+
+#. Proportions of “legal” lobsters at the 5 sites in 2017. The legal minimum carapace size for lobster is 82.6 mm. What proportion of observed lobsters at each siteare above the legal minimum? Does that proportion differ significantly across the 5 sites? Note: We’ll bedoing chi-square in labs next week, or go ahead with maximum resourcefulness and check out the chisq.test()function on your own!
+
+lob_legal <- lob_2 %>%
+  mutate(legal=ifelse(SIZE > 86.2, "YES", "NO")) %>%
+  count(SITE, legal) %>% 
+  spread(legal, n) %>% 
+  select(-SITE)
+
+rownames(lob_legal) <- c("AQUE", "CARP", "IVEE", "MOHK", "NAPL")
+
+lob_legal
+#proportions
+
+legal_prop <- round(prop.table(as.matrix(lob_legal), 1), 3)
+
+
+#chi square test
+
+lobster_4 <- chisq.test(lob_legal)
+lobster_4
+
+#there is significant difference
+
+```
+
+2017 proportions of lobster carapace sizes that were above the legal minimum of 82.6 mm differed signficantly by site (x-squared= 64.288, p < 0.0001, $\alpha$ = 0.05)
+
+
+```{r, echo=FALSE}
+legal_table <- read_csv("legal_lobsters.csv")
+
+prop_table <- kable(legal_table) %>% 
+  kable_styling(font_size = 11, "condensed") %>% 
+  group_rows("Non-MPA", 1, 3) %>% 
+  group_rows("MPA", 4,5)
+prop_table
+```
+
